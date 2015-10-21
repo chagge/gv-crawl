@@ -36,9 +36,8 @@ from scrapy.signalmanager import SignalManager
 from scrapy.item import BaseItem
 from scrapy import log, signals
 
-from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
-from scrapy.contrib.spiders import CrawlSpider, Rule
-
+from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 
 class WarcWriter(object):
     '''Writes `Response` objects into warc files on a given directory.'''
@@ -62,13 +61,13 @@ class WarcWriter(object):
         assert self.warc_fp is None, 'Current Warc file must be None'
 
         self.file_n += 1
-        fname = '%s.%s.warc.gz' % (self.fname_prefix, self.file_n)
+        fname = '{}.{}.warc.gz'.format(self.fname_prefix, self.file_n)
         self.warc_fname = os.path.join(self.outdir, fname)
         self.warc_fp = warc.open(self.warc_fname, 'w')
 
     def open(self, spider):
         self.file_n = spider.state.get('warc_n_start', 0)
-        log.msg('Loading state: %d' % self.file_n)
+        log.msg('Loading state: {}'.format(self.file_n))
 
         # Create a new warc.gz file
         self.warc_fp = None
@@ -76,7 +75,7 @@ class WarcWriter(object):
 
         # Create the db index
         db_fname = os.path.join(self.outdir, '.job', 'index.db')
-        self.db = anydbm.open(db_fname, 'c') # FIXED to not overwrite
+        self.db = anydbm.open(db_fname, 'c')
 
     def close(self, spider):
         self.db.close()
@@ -88,7 +87,7 @@ class WarcWriter(object):
         # Avoid duplicated entries
         response_url = w3lib.url.safe_download_url(response.url)
         if response_url in self.db:
-            log.msg('Ignored already stored response: %s' % response_url, level=log.DEBUG)
+            log.msg('Ignored already stored response: {}'.format(response_url), level=log.DEBUG)
             return
         self.db[response_url] = '1'
 
@@ -135,47 +134,31 @@ class WarcWriter(object):
         now = datetime.datetime.utcnow()
         return now.strftime("%Y-%m-%dT%H:%M:%SZ")
 
-
 class WarcSpider(CrawlSpider):
     '''Stand-alone spider that stores pages in a WARC file'''
     name = 'warc'
     start_urls = []
     allowed_domains = []
 
-    def __init__(self, seeds=None, outdir=None, domains=None):
-        '''
-        `seeds`       Text file containing the seed URLs. One URL per line.
-        `outdir`      Output directory
-        `domains`     Comma separated list of allowed domains.
-        '''
-
-        # FIXED this way no need to compile after init
-        WarcSpider.rules = [Rule(SgmlLinkExtractor(allow=r'.*', tags='link',
+    # FIXED this way no need to compile after init
+    rules = [Rule(LinkExtractor(allow=r'.*', tags='link',
             restrict_xpaths=('//link[@rel="prev"]', '//link[@rel="next"]')),
             callback='archive_page', follow=True)]
 
-        super(WarcSpider, self).__init__()
-
-        # Valiadate arguments
-        assert not outdir is None, 'Argument `outdir` is mandatory'
-        assert not seeds is None, 'Argument `seeds` is mandatory'
-        if domains:
-            self.allowed_domains = domains.split(',')
-
-        # FIXME: Validate settings
-        #assert settings['DOWNLOAD_DELAY'] > 0, 'download_delay must be greater than 0'
-
-        self.writer = WarcWriter(outdir)
-
-        # Load the seeds
-        WarcSpider.start_urls = WarcSpider.load_seeds(seeds)
+    def __init__(self, *args, **kwargs):
+            CrawlSpider.__init__(self, *args, **kwargs)
 
     # FIXED register properly with crawler (close was not called previously)
-    def set_crawler(self, crawler):
-        super(WarcSpider, self).set_crawler(crawler)
-        # Configure signals
+    @classmethod
+    def from_crawler(cls, crawler, seeds, outdir):
+        WarcSpider.start_urls = WarcSpider.load_seeds(seeds)
+        self = cls()
+        self.set_crawler(crawler)
+        #self._follow_links = True
+        self.writer = WarcWriter(outdir)
         crawler.signals.connect(self.writer.open, signals.spider_opened)
         crawler.signals.connect(self.writer.close, signals.spider_closed)
+        return self
 
     def archive_page(self, response):
         '''Callback function that stores a response as a WARC record.'''
@@ -190,6 +173,7 @@ class WarcSpider(CrawlSpider):
 
     @staticmethod
     def load_seeds(fname):
+        log.msg('Loading seeds', level=log.DEBUG)
         '''Loads the seeds from a text file.
 
         It ignores empty lines and lines starting with a '#'.

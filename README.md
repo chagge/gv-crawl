@@ -15,7 +15,7 @@ We can obtain seed URLs from the RSS feeds. It is recommended to add more seeds 
 For example, to crawl the [Malagasy version](http://mg.globalvoicesonline.org) of the website, run:
 
 	mkdir crawl-mg
-	curl http://mg.globalvoicesonline.org/feed/ | python gv-crawl/make_seeds.py > crawl-mg/seeds.txt
+	curl https://mg.globalvoices.org/feed/ | python gv-crawl/make_seeds.py > crawl-mg/seeds.txt
 	python gv-crawl/crawler.py crawl-mg/seeds.txt crawl-mg --delay 1 2> crawl-mg/crawl.log
 
 The crawling can be interrupted and restarted; it should resume operation automatically. This also makes incremental crawling possible.
