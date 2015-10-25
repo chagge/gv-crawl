@@ -1,6 +1,6 @@
 # Parallel text extraction from Global Voices
 
-[Global Voices](http://globalvoicesonline.org) is a community of bloggers and citizen journalists writing and translating news articles in several languages. We crawl articles from this website to create parallel corpora for low-resource languages.
+[Global Voices](http://globalvoices.org) is a community of bloggers and citizen journalists writing and translating news articles in several languages. We crawl articles from this website to create parallel corpora for low-resource languages.
 
 ## Requirements
 
@@ -12,7 +12,7 @@ Python 2.7 is required. Install dependencies with:
 
 We can obtain seed URLs from the RSS feeds. It is recommended to add more seeds at different starting dates if starting to crawl from scratch. The crawler will follow the previous and next article links on each page.
 
-For example, to crawl the [Malagasy version](http://mg.globalvoicesonline.org) of the website, run:
+For example, to crawl the [Malagasy version](http://mg.globalvoices.org) of the website, run:
 
 	mkdir crawl-mg
 	curl https://mg.globalvoices.org/feed/ | python gv-crawl/make_seeds.py > crawl-mg/seeds.txt
