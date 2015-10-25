@@ -17,6 +17,7 @@ For example, to crawl the [Malagasy version](http://mg.globalvoices.org) of the 
 	mkdir crawl-mg
 	curl https://mg.globalvoices.org/feed/ | python gv-crawl/make_seeds.py > crawl-mg/seeds.txt
 	python gv-crawl/crawler.py crawl-mg/seeds.txt crawl-mg --delay 1 2> crawl-mg/crawl.log
+	python gv-crawl/warc2db.py ./crawl-mg/scrapy.*.warc.gz articles.db
 
 The crawling can be interrupted and restarted; it should resume operation automatically. This also makes incremental crawling possible.
 
@@ -29,11 +30,11 @@ To crawl the English translations
 	python gv-crawl/en-translation-urls.py en mg articles.db > crawl-mg/en-urls.txt
 	python gv-crawl/nolink-crawler.py crawl-mg/en-urls.txt crawl-mg --delay 1 2> crawl-mg/en-crawl.log
 
-## Step 2: create article database
+## Step 2: create article database again
 
 After we have crawled several versions of the website, we can find parallel documents for a pair of languages. Fist, we insert all articles in a database (repeat for all languages):
 
-    python gv-crawl/warc2db.py ./crawl-mg/scrapy.*.warc.gz articles.db
+	python gv-crawl/warc2db.py ./crawl-mg/scrapy.*.warc.gz articles.db
 
 ## Step 3: sentence alignment
 
