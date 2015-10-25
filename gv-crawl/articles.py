@@ -9,7 +9,7 @@ langid.langid.load_model()
 langid.langid.identifier.norm_probs = lambda vals: numpy.exp(vals - numpy.logaddexp.reduce(vals))
 
 Article = namedtuple('Article', 'url, id, lang, metadata, translations, source, title, entry')
-url_pattern = re.compile('https?://([a-z]+\.)?globalvoices\.org')
+url_pattern = re.compile('https?://([a-z]+\.)?globalvoices(online)?\.org')
 
 block_elements = set(('address', 'blockquote', 'dd', 'div', 'dl', 'dt', 'dd',
     'fieldset', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr',

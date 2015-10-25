@@ -15,7 +15,6 @@ def find_translation_url(article, lang):
         if not m: continue
         l = m.group(1)
         l = 'en' if not l else l[:-1]
-        l = 'en' if l in ('rising', 'advocacy') else l
         if l == lang:
             return url
 

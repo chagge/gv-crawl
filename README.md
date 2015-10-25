@@ -22,6 +22,13 @@ The crawling can be interrupted and restarted; it should resume operation automa
 
 Compressed WARC files containing the crawled pages are created.
 
+## Step 1b: crawl English translations
+
+To crawl the English translations
+
+	python gv-crawl/en-translation-urls.py en mg articles.db > crawl-mg/en-urls.txt
+	python gv-crawl/nolink-crawler.py crawl-mg/en-urls.txt crawl-mg --delay 1 2> crawl-mg/en-crawl.log
+
 ## Step 2: create article database
 
 After we have crawled several versions of the website, we can find parallel documents for a pair of languages. Fist, we insert all articles in a database (repeat for all languages):
@@ -32,6 +39,7 @@ After we have crawled several versions of the website, we can find parallel docu
 
 Then, we use the [Gargantua sentence aligner](http://sourceforge.net/projects/gargantua/) to align the sentences from parallel articles:
 
+	export GARGANTUA=/path/to/gargantua
 	python gv-crawl/db2bidoc.py en mg articles.db $GARGANTUA
 	cd $GARGANTUA && mkdir corpus_data && cd corpus_data && ../src/sentence-aligner
 
