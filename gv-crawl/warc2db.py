@@ -47,7 +47,7 @@ def main():
                 n_records += 1
                 try:
                     yield process_article(record)
-                except AssertionError as e:
+                except Exception as e:
                     n_errors += 1
                     logging.error('{}\t{}'.format(record.url, e))
             warc_file.close()
